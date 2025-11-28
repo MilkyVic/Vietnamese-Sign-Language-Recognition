@@ -1,0 +1,8 @@
+*.npy
+*.mp4
+*.npz
+.venv/
+.env
+__pycache__/
+chrome-linux64/
+chromedriver-win64/

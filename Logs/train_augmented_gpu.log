@@ -1,0 +1,15 @@
+2025-11-22 13:29:40,576 - INFO - Starting train_augmented_gpu pipeline.
+2025-11-22 13:29:40,869 - INFO - Loaded 3328 classes.
+2025-11-22 13:29:47,388 - INFO - Discovered 3331328 .npz files under Data_gpu
+2025-11-22 13:29:55,051 - INFO - Train samples: 2665062
+2025-11-22 13:29:55,051 - INFO -   Val samples: 333133
+2025-11-22 13:29:55,051 - INFO -  Test samples: 333133
+2025-11-22 13:34:45,493 - INFO - Starting train_augmented_gpu pipeline.
+2025-11-22 13:34:45,690 - INFO - Loaded 3328 classes.
+2025-11-22 13:34:52,160 - INFO - Discovered 3331328 .npz files under Data_gpu
+2025-11-22 13:34:59,715 - INFO - Train samples: 2665062
+2025-11-22 13:34:59,716 - INFO -   Val samples: 333133
+2025-11-22 13:34:59,716 - INFO -  Test samples: 333133
+2025-11-22 13:35:05,907 - INFO - Model compiled, starting training.
+2025-11-23 01:25:48,596 - INFO - Test results: {'loss': 0.013116025365889072, 'compile_metrics': 0.9937559962272644}
+2025-11-23 01:25:48,596 - INFO - Training completed.

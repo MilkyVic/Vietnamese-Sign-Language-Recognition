@@ -1,0 +1,12 @@
+opencv-python
+mediapipe
+matplotlib
+tqdm
+streamlit
+tensorflow
+scipy
+requests
+scikit-learn
+pandas
+openai
+torch
