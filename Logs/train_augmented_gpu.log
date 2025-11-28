@@ -13,3 +13,20 @@
 2025-11-22 13:35:05,907 - INFO - Model compiled, starting training.
 2025-11-23 01:25:48,596 - INFO - Test results: {'loss': 0.013116025365889072, 'compile_metrics': 0.9937559962272644}
 2025-11-23 01:25:48,596 - INFO - Training completed.
+2025-11-28 07:08:17,096 - INFO - Starting train_augmented_gpu pipeline.
+2025-11-28 07:08:17,236 - INFO - Loaded 3328 classes.
+2025-11-28 07:08:23,922 - INFO - Discovered 3331328 .npz files under Data_gpu
+2025-11-28 07:08:27,720 - INFO - Train samples: 2665728
+2025-11-28 07:08:27,720 - INFO -   Val samples: 332800
+2025-11-28 07:08:27,720 - INFO -  Test samples: 332800
+2025-11-28 07:29:54,087 - INFO - Starting train_augmented_gpu pipeline.
+2025-11-28 07:29:54,218 - INFO - Loaded 3328 classes.
+2025-11-28 07:30:00,912 - INFO - Discovered 3331328 .npz files under Data_gpu
+2025-11-28 07:30:04,730 - INFO - Train samples: 2665728
+2025-11-28 07:30:04,730 - INFO -   Val samples: 332800
+2025-11-28 07:30:04,730 - INFO -  Test samples: 332800
+2025-11-28 07:45:17,610 - INFO - LABEL COVERAGE:
+2025-11-28 07:45:17,610 - INFO -   TRAIN: 3328 / 3328 labels present, 0 missing
+2025-11-28 07:45:17,610 - INFO -   VAL:   3328 / 3328 labels present, 0 missing
+2025-11-28 07:45:17,610 - INFO -   TEST:  3328 / 3328 labels present, 0 missing
+2025-11-28 07:45:22,845 - INFO - Model compiled, starting training.

@@ -7,7 +7,7 @@ from openai import OpenAI
 from load_env import load_dotenv
 
 
-def synthesize_speech(text: str, output_path: Path, voice: str = "coral") -> Path:
+def synthesize_speech(text: str, output_path: Path, voice: str = "alloy") -> Path:
     if not text:
         raise ValueError("Text must not be empty.")
 
@@ -16,12 +16,11 @@ def synthesize_speech(text: str, output_path: Path, voice: str = "coral") -> Pat
 
     format_ext = output_path.suffix.lstrip(".") or "mp3"
     with client.audio.speech.with_streaming_response.create(
-        model="gpt-4o-mini-tts",
+        model="tts-1",
         voice=voice,
         input=text,
         response_format=format_ext,
-        instructions="Hãy nói theo tone giọng tiếng Việt, nhấn nhá đầy đủ, lên xuống tự nhiên như giọng miền Trung Việt Nam.",
-        speed=1.25,
+        speed=1.0,
     ) as response:
         response.stream_to_file(output_path)
 
