@@ -12,11 +12,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
+from load_env import load_dotenv
 from text_to_speech import synthesize_speech
 from vsl_recognition import SignLanguageRecognizer
 
+# Load environment variables whether the server is started from repo root or the
+# inner project directory. The second call is a no-op if the first succeeds.
+_here = Path(__file__).resolve().parent
+load_dotenv(_here / ".env")
+load_dotenv(_here.parent / ".env")
+
 recognizer = SignLanguageRecognizer()
 tts_output_dir = Path("Outputs/app_predictions")
+tts_output_dir.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="Vietnamese Sign Language API")
 app.add_middleware(

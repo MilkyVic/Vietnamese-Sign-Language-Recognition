@@ -90,10 +90,19 @@ def interpolate_keypoints(
     if not keypoints_sequence:
         raise ValueError("Keypoints sequence is empty")
 
-    original_times = np.linspace(0, 1, len(keypoints_sequence))
+    num_frames = len(keypoints_sequence)
+    num_features = keypoints_sequence[0].shape[0]
+
+    # If we only captured one frame, repeat it to avoid scipy errors.
+    if num_frames == 1:
+        return np.tile(keypoints_sequence[0], (target_len, 1))
+
+    # Cubic interpolation needs at least 4 points; fall back to linear otherwise.
+    interp_kind = "cubic" if num_frames >= 4 else "linear"
+
+    original_times = np.linspace(0, 1, num_frames)
     target_times = np.linspace(0, 1, target_len)
 
-    num_features = keypoints_sequence[0].shape[0]
     interpolated_sequence = np.zeros((target_len, num_features))
 
     for feature_idx in range(num_features):
@@ -102,7 +111,7 @@ def interpolate_keypoints(
         interpolator = interp1d(
             original_times,
             feature_values,
-            kind="cubic",
+            kind=interp_kind,
             bounds_error=False,
             fill_value="extrapolate",
         )

@@ -93,8 +93,15 @@ const TranslationApp = ({ onBack }) => {
   const [status, setStatus] = useState('Ready'); // 'Ready', 'Translating', 'Success', 'Error'
   const [error, setError] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [cameraError, setCameraError] = useState(null);
+  const [isCameraReady, setIsCameraReady] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const fileInputRef = useRef(null);
   const audioRef = useRef(null);
+  const videoRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const streamRef = useRef(null);
 
   const playAudio = useCallback(() => {
     if (audioRef.current) {
@@ -104,6 +111,11 @@ const TranslationApp = ({ onBack }) => {
 
   const handleFileUpload = async (file) => {
     if (!file) return;
+    // update video preview for both upload and live-recorded files
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(URL.createObjectURL(file));
 
     setStatus('Translating');
     setTranslation(null);
@@ -137,6 +149,51 @@ const TranslationApp = ({ onBack }) => {
   };
 
   useEffect(() => {
+    const stopStream = () => {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+      setIsCameraReady(false);
+    };
+
+    if (activeTab !== 'live') {
+      stopStream();
+      return () => {};
+    }
+
+    let cancelled = false;
+    const enableCamera = async () => {
+      setCameraError(null);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        if (cancelled) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+        setIsCameraReady(true);
+      } catch (camErr) {
+        setCameraError('Trình duyệt chặn quyền camera hoặc không có thiết bị phù hợp.');
+        setIsCameraReady(false);
+      }
+    };
+
+    enableCamera();
+
+    return () => {
+      cancelled = true;
+      stopStream();
+    };
+  }, [activeTab]);
+
+  useEffect(() => {
     if (status === 'Success' && audioUrl) {
       playAudio();
     }
@@ -155,6 +212,53 @@ const TranslationApp = ({ onBack }) => {
 
   const onDragOver = (e) => {
     e.preventDefault();
+  };
+
+  const recordFromCamera = () => {
+    if (!streamRef.current) {
+      setCameraError('Không thể truy cập camera. Hãy kiểm tra quyền truy cập.');
+      setStatus('Error');
+      setError('Không thể truy cập camera.');
+      return;
+    }
+
+    let recorder;
+    try {
+      recorder = new MediaRecorder(streamRef.current, { mimeType: 'video/webm' });
+    } catch (recErr) {
+      setCameraError('Trình duyệt không hỗ trợ ghi hình (MediaRecorder/video/webm).');
+      setStatus('Error');
+      setError('Trình duyệt không hỗ trợ ghi hình.');
+      return;
+    }
+
+    const chunks = [];
+    recorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        chunks.push(event.data);
+      }
+    };
+    recorder.onstop = () => {
+      setIsRecording(false);
+      const blob = new Blob(chunks, { type: 'video/webm' });
+      const file = new File([blob], `live-${Date.now()}.webm`, { type: 'video/webm' });
+      mediaRecorderRef.current = null;
+      handleFileUpload(file);
+    };
+
+    mediaRecorderRef.current = recorder;
+    setIsRecording(true);
+    setStatus('Translating');
+    setTranslation(null);
+    setError(null);
+    setAudioUrl(null);
+    recorder.start();
+    // Auto-stop after 5 seconds to keep the clip small
+    setTimeout(() => {
+      if (recorder.state !== 'inactive') {
+        recorder.stop();
+      }
+    }, 5000);
   };
 
   return (
@@ -214,31 +318,75 @@ const TranslationApp = ({ onBack }) => {
           {/* Left Panel: Camera/Input */}
           <div className="bg-[#0f172a] rounded-3xl overflow-hidden shadow-xl border border-slate-800 flex flex-col relative group">
              {activeTab === 'live' ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
-                  <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4 group-hover:bg-slate-700 transition-colors">
-                    <Video size={32} />
+                <>
+                  <div className="flex-1 relative bg-black">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover bg-black"
+                    />
+                    {!isCameraReady && !cameraError && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-slate-300 bg-slate-900/70">
+                        <Video size={32} />
+                        <p>Đang mở camera...</p>
+                      </div>
+                    )}
+                    {cameraError && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-red-200 bg-slate-900/80 px-6 text-center">
+                        <Video size={32} />
+                        <p>{cameraError}</p>
+                      </div>
+                    )}
+                    {isRecording && (
+                      <div className="absolute top-4 left-4 flex items-center gap-2 text-red-400 font-semibold">
+                        <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
+                        Đang ghi 5 giây...
+                      </div>
+                    )}
                   </div>
-                  <p className="font-medium">Camera Preview</p>
-                  <p className="text-xs text-slate-500 mt-2">Access needed</p>
-
-                  {/* Simulate camera UI overlay */}
-                  <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-                    <div className="w-14 h-14 rounded-full border-4 border-white flex items-center justify-center">
-                      <div className="w-10 h-10 bg-red-500 rounded-full animate-pulse opacity-0"></div>
+                  <div className="p-4 bg-slate-900 flex items-center justify-between text-sm">
+                    <div className="text-slate-300">
+                      {isCameraReady && !cameraError ? 'Camera đã sẵn sàng' : cameraError || 'Đang yêu cầu quyền camera...'}
                     </div>
+                    <button
+                      onClick={recordFromCamera}
+                      disabled={!isCameraReady || isRecording}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition ${
+                        !isCameraReady || isRecording
+                          ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                          : 'bg-[#e11d48] text-white hover:bg-[#be123c]'
+                      }`}
+                    >
+                      <Video size={18} />
+                      {isRecording ? 'Đang ghi...' : 'Ghi 5s & dịch'}
+                    </button>
                   </div>
-                </div>
+                </>
              ) : (
                 <div
-                  className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 border-2 border-dashed border-slate-700 m-4 rounded-2xl cursor-pointer"
+                  className="flex-1 flex flex-col items-center justify-center text-slate-400 p-3 md:p-4 border-2 border-dashed border-slate-700 m-4 rounded-2xl cursor-pointer relative overflow-hidden bg-slate-900"
                   onClick={() => fileInputRef.current.click()}
                   onDrop={onDrop}
                   onDragOver={onDragOver}
                 >
                    <input type="file" ref={fileInputRef} onChange={onFileSelect} className="hidden" accept="video/*" />
-                   <Upload size={48} className="mb-4 text-slate-500" />
-                   <p className="font-medium text-lg text-white">Upload Video</p>
-                   <p className="text-sm mt-1">Drag & drop or click to browse</p>
+                   {previewUrl ? (
+                     <video
+                       src={previewUrl}
+                       controls
+                       autoPlay
+                       loop
+                       className="w-full h-full object-contain bg-black rounded-xl"
+                     />
+                   ) : (
+                     <>
+                       <Upload size={48} className="mb-4 text-slate-500" />
+                       <p className="font-medium text-lg text-white">Upload Video</p>
+                       <p className="text-sm mt-1">Drag & drop or click to browse</p>
+                     </>
+                   )}
                 </div>
              )}
           </div>
