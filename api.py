@@ -11,6 +11,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from openai import OpenAI
 
 from load_env import load_dotenv
 from text_to_speech import synthesize_speech
@@ -25,6 +26,7 @@ load_dotenv(_here.parent / ".env")
 recognizer = SignLanguageRecognizer()
 tts_output_dir = Path("Outputs/app_predictions")
 tts_output_dir.mkdir(parents=True, exist_ok=True)
+_kinesis_dist = Path("Kinesis 3/dist")
 
 app = FastAPI(title="Vietnamese Sign Language API")
 app.add_middleware(
@@ -36,6 +38,7 @@ app.add_middleware(
 )
 
 app.mount("/audio", StaticFiles(directory=tts_output_dir), name="audio")
+client = OpenAI()
 
 
 @app.get("/health")
@@ -67,8 +70,8 @@ async def predict_from_video(file: UploadFile = File(...)):
     try:
         synthesize_speech(result.label, audio_file)
         audio_url = f"/audio/{audio_file.name}"
-    except Exception:
-        audio_url = None
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"TTS failed: {exc}") from exc
 
     return {
         "label": result.label,
@@ -79,18 +82,41 @@ async def predict_from_video(file: UploadFile = File(...)):
     }
 
 
-# Serve frontend
-app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets")
+@app.post("/transcribe")
+async def transcribe_audio(file: UploadFile = File(...)):
+    """Speech-to-text using OpenAI gpt-4o-transcribe."""
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Missing filename")
+
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=Path(file.filename).suffix or ".wav") as tmp:
+        tmp.write(await file.read())
+        tmp_path = tmp.name
+
+    try:
+        with open(tmp_path, "rb") as audio_f:
+            result = client.audio.transcriptions.create(
+                model="gpt-4o-transcribe",
+                file=audio_f,
+                language="vi",
+            )
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Transcription failed: {exc}") from exc
+    finally:
+        Path(tmp_path).unlink(missing_ok=True)
+
+    return {"text": result.text, "language": "vi"}
 
 
-@app.get("/{full_path:path}")
-async def serve_frontend(full_path: str):
-    """Serve the frontend for all routes that are not API routes."""
-    # pylint: disable=unused-argument
-    return FileResponse("frontend/dist/index.html")
+# Serve frontend from Kinesis 3 build (includes static like /logo.png)
+if not _kinesis_dist.exists():
+    raise RuntimeError("Kinesis 3 build not found. Please run npm run build in Kinesis 3.")
+
+app.mount("/", StaticFiles(directory=_kinesis_dist, html=True), name="kinesis")
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("api:app", host="127.0.0.1", port=8001, reload=True)

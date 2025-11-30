@@ -137,9 +137,9 @@ def build_model(num_classes):
 
 
 def create_callbacks():
-    ckpt_dir = 'Models/checkpoints_gpu'
+    ckpt_dir = 'Models/checkpoints_gpu_2'
     os.makedirs(ckpt_dir, exist_ok=True)
-    checkpoint_path = os.path.join(ckpt_dir, 'best_model.keras')
+    checkpoint_path = os.path.join(ckpt_dir, 'best_model_2.keras')
     csv_log_path = os.path.join(LOG_DIR, 'train_augmented_gpu_history.csv')
 
     callbacks = [

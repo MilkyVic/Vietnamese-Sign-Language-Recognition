@@ -6,3 +6,6 @@
 __pycache__/
 chrome-linux64/
 chromedriver-win64/
+*.zip
+venv/
+.env.local

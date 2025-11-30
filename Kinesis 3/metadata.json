@@ -1,0 +1,8 @@
+{
+  "name": "Kinesis",
+  "description": "Now live in Da Nang",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

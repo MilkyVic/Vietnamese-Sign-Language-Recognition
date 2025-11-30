@@ -160,7 +160,7 @@ class SignLanguageRecognizer:
 
     def __init__(
         self,
-        model_path: str | Path = "Models/checkpoints_gpu/best_model.keras",
+        model_path: str | Path = "Models/checkpoints_gpu_2/best_model_2.keras",
         label_map_path: str | Path = "Logs/label_map.json",
         target_sequence_length: int = TARGET_SEQUENCE_LENGTH,
     ) -> None:
