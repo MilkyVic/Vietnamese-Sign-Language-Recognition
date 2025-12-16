@@ -23,6 +23,7 @@ The Vietnamese Sign Language Recognition system leverages deep learning models a
     - MediaPipe
     - OpenCV
     - Node.js and npm
+    - FFmpeg (required to generate poster thumbnails for videos)
 - **Hardware**:
     - Webcam (required for webcam recognition)
     - GPU (recommended for model training)
@@ -39,6 +40,15 @@ Ensure Python is installed. If not, you can download and install it from the off
 pip install -r requirements.txt
 ```
 You will also need to install Node.js and npm. You can download them from the official [Node.js website](https://nodejs.org/).
+
+### Install FFmpeg (required for video posters)
+Pick one that matches your OS:
+- Windows (winget): `winget install --id=Gyan.FFmpeg.Full -e`
+- Windows (choco): `choco install ffmpeg -y`
+- Ubuntu/Debian: `sudo apt update && sudo apt install -y ffmpeg`
+- macOS (Homebrew): `brew install ffmpeg`
+
+Verify: `ffmpeg -version`
 ## Usage
 The system can be used either by running the pre-trained model or by training a new model from scratch.
 ### Running the Application

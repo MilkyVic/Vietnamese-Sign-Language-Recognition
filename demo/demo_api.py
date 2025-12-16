@@ -29,8 +29,8 @@ SCRIPT_TEXT = (
 
 tts_output_dir = Path("Outputs/demo_predictions")
 tts_output_dir.mkdir(parents=True, exist_ok=True)
-# Point to the new main UI build folder (Kinesis 3)
-_kinesis_dist = _here.parent / "Kinesis 3" / "dist"
+# Point to the new main UI build folder (Kinesis3)
+_kinesis_dist = _here.parent / "Kinesis3" / "dist"
 
 app = FastAPI(title="Vietnamese Sign Language API - Demo (scripted)")
 app.add_middleware(
