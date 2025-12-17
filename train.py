@@ -261,4 +261,4 @@ if __name__ == "__main__":
         callbacks=callbacks
     )
 
-    print("Training Finished!")
+    print("Training Finished")
