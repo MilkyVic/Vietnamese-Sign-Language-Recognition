@@ -270,7 +270,7 @@ export const TranslationMock: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Input · Sign (video)</span>
                 <span className="bg-primary-50 text-primary-700 px-2 py-0.5 rounded text-[10px] font-medium border border-primary-100">
-                  Live camera (5s)
+                  Live camera 
                 </span>
               </div>
 
