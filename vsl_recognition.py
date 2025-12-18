@@ -157,8 +157,8 @@ class RecognitionResult:
 class SignLanguageRecognizer:
     def __init__(
         self,
-        model_path: str | Path = "Models/best_model_subset.keras", # Đã sửa đường dẫn mặc định chuẩn
-        label_map_path: str | Path = "label_map_subset.json",      # Đã sửa đường dẫn mặc định chuẩn
+        model_path: str | Path = "Models/best_model.keras", # Đã sửa đường dẫn mặc định chuẩn
+        label_map_path: str | Path = "label_map.json",      # Đã sửa đường dẫn mặc định chuẩn
         target_sequence_length: int = TARGET_SEQUENCE_LENGTH,
     ) -> None:
         self.model_path = Path(model_path)

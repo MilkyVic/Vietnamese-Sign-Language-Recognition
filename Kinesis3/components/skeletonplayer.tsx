@@ -53,8 +53,8 @@ const SkeletonPlayer: React.FC<SkeletonPlayerProps> = ({ jsonPath, width = 300, 
     // Xóa màn hình cũ
     ctx.clearRect(0, 0, width, height);
     
-    // --- CẤU HÌNH ĐỘ TO CỦA XƯƠNG ---
-    ctx.lineWidth = 8; // <--- ĐÃ TĂNG LÊN 8 CHO DÀY
+
+    ctx.lineWidth = 2; 
     ctx.lineCap = "round";
 
     // Hàm kiểm tra điểm hợp lệ (Khác 0)
@@ -84,7 +84,7 @@ const SkeletonPlayer: React.FC<SkeletonPlayerProps> = ({ jsonPath, width = 300, 
           ctx.beginPath();
           // --- CẤU HÌNH ĐỘ TO CỦA KHỚP ---
           // Số 6 ở dưới là bán kính, càng to chấm càng bự
-          ctx.arc(p.x * width, p.y * height, 6, 0, 2 * Math.PI); 
+          ctx.arc(p.x * width, p.y * height, 1, 0, 1 * Math.PI); 
           ctx.fill();
         }
       });
