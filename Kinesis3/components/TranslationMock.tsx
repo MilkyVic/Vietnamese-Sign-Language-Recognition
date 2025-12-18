@@ -258,7 +258,7 @@ export const TranslationMock: React.FC = () => {
                  />
                  <div className="mt-2 px-3 py-1 bg-black/40 rounded-full border border-slate-700">
                     <span className="text-[10px] text-cyan-400 font-mono">
-                      Playing: {normalizedResult}
+                      
                     </span>
                  </div>
               </div>

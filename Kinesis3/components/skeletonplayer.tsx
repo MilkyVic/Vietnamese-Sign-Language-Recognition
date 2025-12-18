@@ -53,8 +53,8 @@ const SkeletonPlayer: React.FC<SkeletonPlayerProps> = ({ jsonPath, width = 300, 
     // Xóa màn hình cũ
     ctx.clearRect(0, 0, width, height);
     
-    // Config nét vẽ
-    ctx.lineWidth = 2;
+    // --- CẤU HÌNH ĐỘ TO CỦA XƯƠNG ---
+    ctx.lineWidth = 8; // <--- ĐÃ TĂNG LÊN 8 CHO DÀY
     ctx.lineCap = "round";
 
     // Hàm kiểm tra điểm hợp lệ (Khác 0)
@@ -82,16 +82,18 @@ const SkeletonPlayer: React.FC<SkeletonPlayerProps> = ({ jsonPath, width = 300, 
       points.forEach(p => {
         if (isValid(p)) {
           ctx.beginPath();
-          ctx.arc(p.x * width, p.y * height, 2, 0, 2 * Math.PI);
+          // --- CẤU HÌNH ĐỘ TO CỦA KHỚP ---
+          // Số 6 ở dưới là bán kính, càng to chấm càng bự
+          ctx.arc(p.x * width, p.y * height, 6, 0, 2 * Math.PI); 
           ctx.fill();
         }
       });
     };
 
     // --- VẼ ---
-    // 1. Pose (Thân mình) - Màu trắng
+    // 1. Pose (Thân mình) - Màu trắng sáng
     if (frame.pose) {
-        drawConnectors(frame.pose, POSE_CONNECTIONS, "rgba(255, 255, 255, 0.7)");
+        drawConnectors(frame.pose, POSE_CONNECTIONS, "white");
         drawLandmarks(frame.pose, "white");
     }
 
@@ -128,7 +130,7 @@ const SkeletonPlayer: React.FC<SkeletonPlayerProps> = ({ jsonPath, width = 300, 
     // Chỉnh tốc độ: setTimeout giúp video không chạy quá nhanh
     setTimeout(() => {
         requestRef.current = requestAnimationFrame(animate);
-    }, 50); // 50ms ~ 20fps (Tốc độ vừa phải)
+    }, 50); // 50ms ~ 20fps
   };
 
   useEffect(() => {
