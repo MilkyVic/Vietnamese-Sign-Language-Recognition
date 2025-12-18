@@ -21,7 +21,7 @@ export const Navbar: React.FC = () => {
     { name: 'Features', href: '#features' },
     { name: 'Demo', href: '#demo' },
     { name: 'Community', href: '#community' },
-    { name: 'Learning Library', href: '#/learning-library' },
+    { name: 'Learning Hub', href: 'https://qipedc.moet.gov.vn/dictionary' },
   ];
 
   return (
@@ -51,6 +51,8 @@ export const Navbar: React.FC = () => {
                 key={link.name} 
                 href={link.href} 
                 className="text-sm font-medium text-slate-600 hover:text-primary-600 transition-colors"
+                target={link.href.startsWith('http') ? '_blank' : undefined}
+                rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
               >
                 {link.name}
               </a>
@@ -81,6 +83,8 @@ export const Navbar: React.FC = () => {
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)} 
                 className="text-lg font-medium text-slate-800 py-2 border-b border-slate-50"
+                target={link.href.startsWith('http') ? '_blank' : undefined}
+                rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
               >
                 {link.name}
               </a>
