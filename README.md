@@ -1,90 +1,84 @@
-# VIETNAMESE SIGN LANGUAGE RECOGNITION
-A system for recognizing Vietnamese Sign Language using deep learning and computer vision techniques, tailored specifically for Vietnamese sign language.
-## Table of Contents
-- [Overview](#overview)
-- [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Usage](#usage)
-  - [Running the Application](#running-the-application)
-  - [Training from Scratch](#training-from-scratch)
-## Overview
-The Vietnamese Sign Language Recognition system leverages deep learning models and computer vision to interpret Vietnamese sign language gestures. It uses MediaPipe for landmark detection, TensorFlow for model training, and React for a user-friendly interface. The system supports recognition through video files or live webcam feeds.
-## Features
-- Automated Video Download: Automatically downloads videos for training data.
-- Data Preprocessing: Processes and augments data for model training.
-- Sign Language Recognition: Recognizes Vietnamese sign language gestures via video or webcam input.
-- User Interface: Provides a React-based web interface for easy interaction.
+# Vietnamese Sign Language Recognition
+
+A lightweight FastAPI + React (Vite) app for Vietnamese Sign Language (VSL): browse/sign videos, run speech-to-text via OpenAI, and serve local dataset videos/posters.
+
 ## Requirements
-- **Software**:
-    - Python 3.8 or higher
-    - TensorFlow 2.x
-    - Scikit-learn
-    - MediaPipe
-    - OpenCV
-    - Node.js and npm
-    - FFmpeg (required to generate poster thumbnails for videos)
-- **Hardware**:
-    - Webcam (required for webcam recognition)
-    - GPU (recommended for model training)
-## Installation
-### 1. Clone the repository
+- Python 3.10+ (recommended)
+- Node.js 18+ and npm
+- FFmpeg (for video posters) — verify with `ffmpeg -version`
+- OpenAI API key (`OPENAI_API_KEY` in `.env`)
+- (Optional) GPU for training/augmentation
+
+## Project Layout
+- `api.py` — FastAPI backend (serves Kinesis3 build, `/learning-library`, `/sign-animation`, `/transcribe`, posters, videos)
+- `Kinesis3/` — frontend (Vite/React)
+- `Dataset/Videos/` — video files (served at `/videos/...`)
+- `Dataset/Text/label.csv` — labels for videos (`VIDEO`, `LABEL`)
+- `Outputs/app_predictions/` — TTS output folder
+- Augmentation/training scripts: `create_data_augment.py`, `create_data_augment_gpu.py`, `download_data.py`, `trainning.ipynb`
+
+## Setup
+
+### 1) Clone and enter
 ```bash
-git clone https://github.com/photienanh/Vietnamese-Sign-Language-Recognition
+git clone <repo-url>
 cd Vietnamese-Sign-Language-Recognition
 ```
-Alternatively, download the ZIP file from GitHub and extract it.
-### 2. Install Dependencies
-Ensure Python is installed. If not, you can download and install it from the official [Python website](https://www.python.org/downloads/). Then, install the required libraries:
+
+### 2) Python env + deps
 ```bash
+python -m venv .venv
+.\.venv\Scripts\activate   # Windows
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
-You will also need to install Node.js and npm. You can download them from the official [Node.js website](https://nodejs.org/).
+(If mediapipe/protobuf conflicts, pin: `pip install "protobuf<4" "mediapipe==0.10.9"`.)
 
-### Install FFmpeg (required for video posters)
-Pick one that matches your OS:
-- Windows (winget): `winget install --id=Gyan.FFmpeg.Full -e`
-- Windows (choco): `choco install ffmpeg -y`
+### 3) Node deps + build frontend
+```bash
+cd Kinesis3
+npm install
+npm run build
+cd ..
+```
+Build outputs to `Kinesis3/dist` (served by FastAPI).
+
+### 4) FFmpeg
+Install if missing (pick one):
+- Windows: `winget install --id=Gyan.FFmpeg.Full -e` or `choco install ffmpeg -y`
 - Ubuntu/Debian: `sudo apt update && sudo apt install -y ffmpeg`
 - macOS (Homebrew): `brew install ffmpeg`
 
-Verify: `ffmpeg -version`
-## Usage
-The system can be used either by running the pre-trained model or by training a new model from scratch.
-### Running the Application
-1.  **Install frontend dependencies:**
-    ```bash
-    cd frontend
-    npm install
-    ```
-2.  **Build the frontend:**
-    ```bash
-    npm run build
-    ```
-3.  **Run the backend server:**
-    From the root directory of the project:
-    ```bash
-    uvicorn api:app --reload
-    ```
-This launches a web server on `http://localhost:8000`. You can access the application by opening this URL in your browser.
-
-### Training from Scratch
-To train a new model, follow these steps:
-1. Clear Previous Data (optional).
-```bash
-Get-ChildItem -Path "./" -Directory | Remove-Item -Recurse -Force
+### 5) Environment variables
+Create `.env` in repo root:
 ```
-2. Download Training Data.
-```bash
-python download_data.py
+OPENAI_API_KEY=sk-...
 ```
+(Backend auto-loads `.env`.)
 
-3. Process Data.
+## Running
+
+### Backend
+From repo root:
 ```bash
-python create_data_augment.py
+.\.venv\Scripts\activate
+python -m uvicorn api:app --reload --port 8001
 ```
+- Serves frontend at `/` from `Kinesis3/dist`
+- Videos at `/videos/<file>`
+- Posters at `/video-poster/<file>`
+- Learning library at `/learning-library`
+- STT at `/transcribe` (uses `gpt-4o-transcribe`)
+- Sign animation mapping at `/sign-animation` (maps text to library video or 404 if not found)
 
-4. Train the Model.
-- Open ```training.ipynb``` in a Jupyter Notebook environment.
-- Run all cells to train the model.
-- Note: Training is computationally intensive and best performed on a GPU-enabled device.
+### Frontend
+Already served by FastAPI after `npm run build`. Open `http://127.0.0.1:8001`.
+
+## Data Notes
+- `Dataset/Text/label.csv` has ~12,418 rows but only ~4,000 actual video files; many labels are duplicates or missing video files. Clean or dedupe if needed before training/serving.
+- `download_data.py` appends all fetched entries without deduplication; run cleanup to avoid duplicate labels.
+
+## Training / Augmentation (optional)
+- `download_data.py` — fetch videos/labels from QIPEDC.
+- `create_data_augment.py` / `_gpu.py` — extract landmarks, augment sequences, save `.npz`.
+- `trainning.ipynb` — train the model (GPU recommended).
